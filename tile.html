@@ -1,0 +1,239 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>Mycelium</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            padding:0;
+            margin: 0;
+            text-align:center;
+            overflow:scroll;
+        
+        }
+    </style>
+</head>
+<body>
+<script type="text/javascript">
+
+    var config = {
+        type: Phaser.AUTO,
+        width: 1920*.5,
+        height: 1080*0.5,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 300 },
+                debug: false
+            }
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
+
+    var player;
+    var platforms;
+    var cursors;
+
+    var game = new Phaser.Game(config);
+
+    function preload ()
+    {
+        this.load.image('shores', 'platformer/bg/shores.png');
+        this.load.image('hills', 'platformer/bg/hills.png');
+        this.load.image('cloud1', 'platformer/bg/cloud1.png');
+        this.load.image('cloud2', 'platformer/bg/cloud2.png');
+        this.load.image('background', 'platformer/bg/background.png');
+        this.load.image('platform', 'assets/platform.png');
+        
+
+        this.load.spritesheet('boy', 
+            'assets/boy.png',
+            { frameWidth: 122, frameHeight: 180 }
+        );
+    }
+
+    function create ()
+    {
+        // Add the sky image at the right location and resize it to take all the space, no scaling needed
+        /*let background = this.add.image(topBackgroundXOrigin, topBackgroundYOrigin, 'background');
+        background.setDisplaySize(windowWidth, topBackgroundHeight);*/
+
+        // Add each layer one by one
+        
+        this.background = this.add.tileSprite(0, 0, 1920, 1080, 'background');
+        this.background.setOrigin(0,0);
+        this.background.setScale(0.5);
+        this.background.setScrollFactor(0);
+
+        /*this.cloud2 = this.add.image(0, 0, 'cloud2');
+        this.background.setOrigin(300,60);
+        this.background.setScale(0.5);
+        this.cloud2.setScrollFactor(0);*/
+
+        this.cloud2 = this.add.tileSprite(0, 0, 1920, 1080, 'cloud2');
+        this.cloud2.setOrigin(0,0);
+        this.cloud2.setScale(0.5);
+        this.cloud2.setScrollFactor(0);
+
+        
+        this.cloud1 = this.add.tileSprite(0, 0, 1920, 1080, 'cloud1');
+        this.cloud1.setOrigin(0,0);
+        this.cloud1.setScale(0.5);
+        this.cloud1.setScrollFactor(0.1);
+        
+
+        this.hills = this.add.tileSprite(0, 0, 1920, 1080, 'hills');
+        this.hills.setScale(0.5);
+        this.hills.setOrigin(0,0);
+        this.hills.setScrollFactor(0);
+        this.hills.setTilePosition(400, 0);
+
+
+        /*this.shores = this.add.tileSprite(0, 0, 3000, 1080, 'shores');
+        
+        this.shores.setOrigin(0,0);
+        this.shores.setTilePosition(100, 0);
+        this.shores.setTileScale(0.5, 0.5);
+        this.shores.setScrollFactor(0);*/
+
+        this.shores = this.add.tileSprite(0, 0, 1920, 1080, 'shores');
+        this.shores.tileScaleX = 0.5;
+        this.shores.tileScaleY = 0.5;
+        this.shores.setOrigin(0,0);
+        
+        this.shores.setTilePosition(600, 0);
+
+        
+
+
+        bones = this.physics.add.staticGroup();
+
+        bones.create(400, 568, 'platform').setScale(1).refreshBody();
+
+        //platforms.create(400, 568, 'platform').setScale(2).refreshBody();
+        /*this.ground - this.physics.add.sprite(0,530, 'platform').setScale(10).refreshBody();
+        this.ground.body.allowGravity = false;
+        this.ground.body.immovable = true; */
+
+        platforms = this.physics.add.group();
+        this.plat0 = platforms.create(0, 540, 'platform');
+        this.plat1 = platforms.create(0, 64, 'platform');
+        this.plat2 = platforms.create(200, 180, 'platform');
+        this.plat3 = platforms.create(0, 400, 'platform');
+
+        platforms.children.each(function(platform) {
+            platform.body.allowGravity = false;
+            platform.body.immovable = true; 
+            platform.setVelocityX(Math.floor(Math.random()*100)-50); 
+            platform.setBounce(1);
+            platform.setCollideWorldBounds(true);  
+            //hmmm remove body?   
+        }, this);
+
+        
+
+
+        player = this.physics.add.sprite(400, 400, 'boy');
+
+        player.setBounce(0.2);
+        player.setCollideWorldBounds(true);
+        
+
+
+        this.anims.create({
+            key: 'jump',
+            frames: this.anims.generateFrameNumbers('boy', { start: 1, end: 7 }),
+            frameRate: 7,
+        });
+
+        this.anims.create({
+            key: 'land',
+            frames: this.anims.generateFrameNumbers('boy', { start: 6, end: 7 }),
+            frameRate: 7,
+        });
+
+        this.anims.create({
+            key: 'default',
+            frames: [ { key: 'boy', frame: 0 } ],
+            frameRate: 7,
+        });
+
+        player.flipX = true;
+
+
+        // allow key inputs to control the player
+        cursors = this.input.keyboard.createCursorKeys();
+
+        
+        this.physics.add.collider(player, platforms);
+        this.physics.add.collider(player, bones);
+
+        // set workd bounds to allow camera to follow the player
+        this.myCam = this.cameras.main;
+        this.myCam.setBounds(0, 0, game.config.width * 3, game.config.height);
+
+        // making the camera follow the player
+        this.myCam.startFollow(player);
+
+        
+    }
+    function jumper () {
+        player.setVelocityY(-300);
+        
+    }
+
+    function update ()
+    {
+        /*platforms.children.each(function(platform) {
+            if (platform.body.moves && platform.body.touching.up && player.body.touching.down) {
+                player.setVelocity(platform.body.velocity);}
+        }, this);*/
+
+
+        this.background.tilePositionX = this.myCam.scrollX;
+        this.cloud1.tilePositionX += this.myCam.scrollX * .00001;
+        this.cloud2.tilePositionX += this.myCam.scrollX * .0001;
+        this.hills.tilePositionX += this.myCam.scrollX * .0005;
+        this.shores.tilePositionX += this.myCam.scrollX * .001;
+        // scroll the texture of the tilesprites proportionally to the camera scroll
+        
+        if (cursors.up.isDown && player.body.onFloor)
+        {
+            player.anims.play('jump');
+            this.time.delayedCall(500, jumper, [], this);
+                
+        }
+        if (cursors.right.isDown)
+        {
+            player.setVelocityX(1);
+                
+        } else if (cursors.left.isDown)
+        {
+            player.setVelocityX(-1);
+                
+        } else {
+            player.setVelocityX(0);
+                
+        }
+    
+
+    }
+    
+    /*function collide (platform, player) {
+  if (platform.body.moves && platform.body.touching.up && player.body.touching.down) {
+    player.setGravityY(10000);
+    player.setVelocityY(platform.velocity.y);
+
+  }*/
+
+</script>
+<p>janky placeholder! one day this will work properly</p>
+<p>keypad 'up' to jump</p>
+<img src="./platformer/mold_platforms.png" width="400px"> </img>
+</body>
+</html>
