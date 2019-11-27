@@ -1,0 +1,82 @@
+html {
+  height: 100%;
+  overflow: scroll;
+  
+}
+
+body {
+    margin: 0;
+    padding:0;
+      perspective: 1px;
+      transform-style: preserve-3d;
+    height: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    font-family: Courier;
+    background-image: url('./CSS ASSETS/core_0006_sky.png');
+    position: static;
+    
+}
+
+img {
+  margin:0px;
+  padding:0px;
+  width: 100vw;
+  height: auto;
+
+}
+
+.parallax {
+    padding: 0px;
+      transform-style: inherit;
+  }
+  .parallax__layer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+  }
+  .parallax__layer--character {
+    transform: translateZ(0.9px) scale (0.1);
+  }
+  .parallax__layer--base {
+    transform: translateZ(0);
+  }
+  .parallax__layer--back {
+    transform: translateZ(-0.1px) scale(1.1);
+  }
+  .parallax__layer--deep {
+    transform: translateZ(-0.9px) scale(1.9);
+  }
+  .parallax__layer--apt {
+    transform: translateZ(-1px) scale(2);
+  }
+  .parallax__layer--mtn {
+    transform: translateZ(-1.1px) scale(2.1);
+  }
+
+  
+  #footer {
+    position: relative;
+    margin-top: 100px;
+    margin-bottom: 0px;
+    background-color: black;
+  }
+
+  .footer {
+    background-color: rgb(255, 255, 255);
+    position: absolute;
+    text-align: center;
+    padding: 10px 20px;
+    margin-bottom: 0px;
+    width: 100vw;
+    margin-top: 200%;
+    z-index:9999999;
+
+  }
+
+a{
+  color: green;
+}
